@@ -1,0 +1,99 @@
+### Cisaillement unixial de matériaux granulaires ###
+    
+## Modification de la simulation ##
+
+# Modification des conditions aux limites
+    change_box   all triclinic # changement de type de boite de simulation
+    set          group all image NULL NULL NULL # repositionne les grains avec les nouvelles conditions aux limites
+
+## Ajout de la friction grain/grain grain/mur mur/grain ##
+
+    pair_style   gran/hooke/history 2E7 1E7 1E4 1E4 0.5 0 # contact Hookien entre particule sans friction
+    pair_coeff	 * * 
+
+## Création des groupes ##
+    
+# Calcul du diamètre des grains 
+
+    # Ce bloc s'assure que la valeur calcul est bien actualisée 
+    compute      dgrain all property/atom diameter # calcul le diamètre des grains -> output = scalaire / grain
+    compute      scal_dgrain all reduce ave c_dgrain # calcul du diamètre moyen des particules 
+    thermo_style custom step pxx pyy pxy c_scal_dgrain # modification de l'affichage 
+    run          0
+    
+# Stockage des grains par groupe de taille 
+    variable     d_min atom "c_dgrain == 3.0" 
+    group        dgrain_min variable d_min # place tout les grains d = dmin dans ce groupe
+    variable     d_max atom "c_dgrain == 4.0"
+    group        dgrain_max variable d_max # place tout les grains d = dmax dans ce groupe
+
+    # Crée le groupe par taille de grains 
+    group        dfloes_min subtract all dgrain_max
+    group        dfloes_max subtract all dgrain_min
+
+## Cisaillement de l'échantillon ##
+    
+    # Début de simulation
+    timestep     1E-5 # Pas de temps de la simulation
+     
+    fix          temp_cste all temp/berendsen 0.0 0.0 200 # définie une température constante durant la simulation
+   
+    fix          sur_amortissement all viscous 1 # ajout d'une force visqueuse dans l'échantillon
+    
+    # Definition du cisaillement par vitesse contante imposée par inclinaison de la boite de cisaillement et compression unixiale 
+    fix          cisaillement all deform 1 xy erate 0.004 units box
+    fix          comp_floes all nph/sphere & 
+                 y 2E3 2E3 1 &
+                 couple none disc 
+   
+    #fix          calcul_v_m all nve/sphere disc # calcul vélocité et moment angulaire de chaque sphère
+    
+    fix          2Dsimu all enforce2d # assure une simulation 2D en annulant les forces/vitesse dans la direction z
+    
+    restart      500000 endo.restart # crée un fichier pour redemarrer une simulation tout les 500 000 pas (8 fichiers crées)
+
+## Calculs ## 
+ 
+    # Calcul des voisins
+    compute      voisin all contact/atom # calcul les voisins situé à d = dmin du centre d'un grain
+    compute      moy_voisin all reduce ave c_voisin # moyenne du nombres de voisins 
+    
+    # Calcul des contraintes du système
+    compute      sigma all stress/atom NULL virial # calcul les contraintes cisaillantes
+    compute      moy_sigma all reduce sum c_sigma[*] # somme le tenseur de contrainte sur l'ensemble des atomes
+    
+    variable     p equal "(c_moy_sigma[1]+c_moy_sigma[2])/2"
+    variable     sigma_xx equal c_moy_sigma[1]
+    variable     sigma_yy equal c_moy_sigma[2]
+    variable     sigma_xy equal c_moy_sigma[4]
+    
+    # Déplacement des grains
+    compute      u_floes all displace/atom
+    compute      u_moy_floes all reduce ave c_u_floes[*][*]
+
+## Commande d'affichage ##
+
+    thermo       10000 # affichage tout les 10 000 pas de temps
+    thermo_style custom & 
+                 step atoms temp press & 
+                 c_moy_voisin density &
+                 lx ly & 
+                 v_sigma_xx v_sigma_yy v_sigma_xy & 
+                 v_p c_u_moy_floes[1] c_u_moy_floes[2]
+    
+    # Sorties graphiques
+    dump		 cisaillement_img all image 100000 cisaillement.*.jpg type type &
+                 zoom 0.8 adiam 4.0
+    dump_modify	 cisaillement_img pad 5
+    
+    #dump         evo_voisin all custom 1000 voisin.txt id c_voisin # affiche le nombre de voisin / grain dans un fichier texte pour d = dmin
+ 
+    #dump         shearing all movie 500 shearing.avi type type &
+    #             zoom 1.2 adiam 4.0 # crée une vidéo du cisaillement
+	#dump_modify  shearing pad 5
+
+## Fin du cisaillement ##
+    
+	run          4000000 #  4 000 000 pas de simulations effectués
+    
+### Fin du module de cisaillement ###

@@ -1,0 +1,62 @@
+### Compression biaxial de matériaux granulaires ###
+    
+## Modification des conditions aux limites ##
+   
+    change_box   all boundary p p p units box # change les conditions limites pour comprimer l'échantillon avec un barostat
+    set          group all image NULL NULL NULL  # repositionne les grains avec les nouvelles conditions limites
+        
+## Fix pour compression unixial ##
+    
+    # Début de simulation
+    timestep     1E-4 # pas de temps de la simulation
+    
+    fix          temp_cste all temp/berendsen 300.0 300.0 200 # définie une température constante durant la simulation
+    fix          calcul_v_m all nve/sphere disc # calcul vélocité et moment angulaire de chaque sphère
+    
+    fix          sur_amortissement all viscous 1.0 # ajout d'une force visqueuse dans l'échantillon 
+    
+    fix          comp_biax all press/berendsen &
+                 iso 1E3 1E3 500 # compression biaxiale échantillon via un barostat p = 100.0
+    
+    fix          2Dsimu all enforce2d # Assure une simulation 2D en annulant les forces/vitesse dans la direction z
+   
+## Calculs ## 
+
+    #Calcul des contraintes dans les floes 
+    compute      sigma_comp all stress/atom NULL virial # calcul les contraintes dans les floes 
+    compute      moy_sigma_comp all reduce sum c_sigma_comp[*] # somme le tenseur de contrainte sur l'ensemble des floes
+    
+    variable     sigma_comp_xx equal c_moy_sigma_comp[1]
+    variable     sigma_comp_yy equal c_moy_sigma_comp[2]
+    variable     sigma_comp_xy equal c_moy_sigma_comp[4]
+    
+    # Calcul des voisins
+    compute      voisin all contact/atom # calcul les voisins situé à d = dmin du centre d'un grain
+    compute      moy_voisin all reduce ave c_voisin # moyenne du nombres de voisins
+    
+    # Déplacement des grains et des bords rigides
+    compute      u_comp all displace/atom
+    compute      u_moy_comp all reduce ave c_u_comp[*][*]
+
+## Affichage ##
+    
+    # affichage : pas_de_temps/température_échantillon/ID_grain/nbre_voisin/nrj_total_échantillon/pression_appliquée/contrainte xx,xy,yy
+    thermo       5000 # affichage tout les 50 000 pas de temps
+    thermo_style custom step atoms c_moy_voisin &
+                 density press c_u_moy_comp[1] c_u_moy_comp[2] &
+                 lx ly &
+                 v_sigma_comp_xx  v_sigma_comp_yy v_sigma_comp_xy
+    
+    #dump		 compression_img all image 100000 compression.*.jpg type type &
+    #             zoom 1.6 adiam 4.0
+    #dump_modify	 compression_img pad 5
+    
+	#dump         compression all movie 500 compression.avi type type &
+    #             zoom 1.6 adiam 4.0 # crée une vidéo de la compression 
+	#dump_modify  compression pad 5
+
+## Fin de la compression ##
+
+	run	         500000 #  500 000  pas de simulations effectués
+    
+### Fin du module de compression ###

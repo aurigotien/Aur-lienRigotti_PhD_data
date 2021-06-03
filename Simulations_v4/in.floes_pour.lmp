@@ -1,0 +1,40 @@
+### Depot de matériaux granulaire en 2D ###
+
+## Definition interaction entre particules ## 
+# arg : contact normal, contact tangentiel, amortissement normal, amortissement tangentiel, coefficient de charge, 0 pour exclure gamma_t
+	pair_style  gran/hooke/history 1E5 0.0 1E3 0.0 0.0 0 # contact Hookien entre particule sans friction
+	pair_coeff	* *
+    
+## Simulation de la chute des grains ##
+
+    fix	gravite all gravity 1.0 spherical 0.0 -180.0 # ajoute la gravitée à la simulation
+    
+    timestep    1E-4 # pas de temps de la simulation
+    
+    fix         calcul_v_m all nve/sphere disc # Calcul la vélocité et le moment angulaire de chaque sphère
+
+# Ajout de reaction normal sur la paroi paroie_y et plan_y 
+    fix	        paroiy all wall/gran hooke/history 2E7 0.0 1E4 0.0 0.0 0 &
+                yplane 0 NULL 
+
+# Fait tomber N grains un par un, vol specifie la fraction volumique (max 0.6), one d unique / range d dans un intervale 
+    fix         depot all pour 860 1 100 vol 0.5 10 &
+                diam poly 2 3.0 0.5 4.0 0.5 region zone_de_chute
+    
+    fix         2Dsimu all enforce2d # Assure une simulation 2D en annulantles forces/vitesse dans la direction z
+
+## Commande d'affichage ##
+    
+    #dump		depot_img all image 500000 depot.*.jpg type type &
+    #            zoom 1.6 adiam 4.0
+    #dump_modify	depot_img pad 5
+    
+    #dump        depot_grain all movie 500 depot_grain.avi type type &
+    #            zoom 1.6 adiam 4.0 # crée une vidéo du dépot des grains
+    #dump_modify depot_grain pad 5
+    
+## Fin du dépot des particules ##
+
+    run	        1500000 # 1 500 000 pas de simulations effectués
+    
+### Fin du module d'initialisation ###
