@@ -4,9 +4,13 @@ Spyder Editor
 
 This is a temporary script file.
 """
+### !!! The code need to be modify depending of which version of the lammps script your are using !!!
+### !!! Line to modify : l.214 / l.217 ; l.271 / l.275 ; l.330 / l.333 ; l.388 / l.392 ; l.427 / l.432
 
-# Routine pour trqcer des graphes depuis le log lammps
-# Debut
+### !!! As this code is made to work on my computer the path for the log.lammps file need to be modified
+
+# Plot the graph from the log.lammps file
+# Beginning
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -206,8 +210,16 @@ def graph_comp(data): # plot for the compression step
 
     # Stress 
     plt.figure(figsize= (10, 5))
-    plt.plot(time, valeur[:,12]/vol, color = 'red', label = 'p')
+    
+    # !!! put line as a comment if using version v3 or v4 !!!
+    plt.plot(time, valeur[:,12]/vol, color = 'red', label = 'p') 
+    
+    # !!! put lines as a coment if using version v5 or more !!!
+    #plt.plot(time, valeur[:,9]/vol, color = 'red', label = 'sigma xx')
+    #plt.plot(time, valeur[:,10]/vol, color = 'blue', label = 'sigma yy')
+    
     plt.plot(time, valeur[:,11]/vol, color = 'green', label = 'sigma xy')
+    
     plt.title('Mean stress p and shear stress xy versus time t - Biaxial compression')
     plt.xlabel('Time t (s)')
     plt.ylabel('Stress xx yy xy (Pa)')
@@ -256,8 +268,16 @@ def graph_relax(data): # plot for the relaxation step
 
     # Stress
     plt.figure(figsize= (10, 5))
+    
+    # !!! put line as a comment if using version v3 or v4 !!!
     plt.plot(time, valeur[:,13]/vol, color = 'red', label = 'p')
     plt.plot(time, valeur[:,12]/vol, color = 'green', label = 'sigma xy')
+    
+    # !!! put lines as a coment if using version v5 or more !!!
+    #plt.plot(time, valeur[:,10]/vol, color = 'green', label = 'sigma xx')
+    #plt.plot(time, valeur[:,11]/vol, color = 'green', label = 'sigma yy')
+    #plt.plot(time, valeur[:,12]/vol, color = 'green', label = 'sigma xy')
+    
     plt.title('Mean stress p and shear stress xy versus time t - Relaxation')
     plt.xlabel('Time t')
     plt.ylabel('Stress xx yy xy (Pa)')
@@ -272,9 +292,11 @@ def graph_cis(data): # plot for the shearing step
     valeur = np.loadtxt(data)
     
     # Variables 
+    shear_rate = 0.005 # shear rate of the simulation
+    time_step = 1E-5
     ela_pla = 15 # limit between elastic and plastic respons
-    vol = (valeur[:,6]*valeur[:,7]) # computation of the volume (1/packing fraction)
-    cis = ((valeur[:,0] - 2.5E6)*1E-5) # constrained shearing
+    vol = (valeur[:,6] * valeur[:,7]) # computation of the volume (1/packing fraction)
+    cis = shear_rate * (valeur[:,0] - valeur[0,0]) * time_step # constrained shearing
     
     # Courbe de tendance cisaillement vs taux de deformation Trend curve shear stress vs constrained shearing
     mod_ela = np.polyfit(cis[:ela_pla], valeur[:ela_pla,10]/vol[:ela_pla], 1) 
@@ -307,9 +329,14 @@ def graph_cis(data): # plot for the shearing step
     
     # Normal stress 
     plt.figure(figsize= (10, 5))
-    plt.plot(cis, valeur[:,8]/vol, color = 'red', label = 'sigma xx')
-    plt.plot(cis, valeur[:,9]/vol, color = 'blue', label = 'sigma yy')
+    
+    # !!! put line as a comment if using version v3 or v4 !!!
     plt.plot(cis, valeur[:,11]/vol, color = 'pink', label = 'p')
+    
+    # !!! put lines as a coment if using version v5 or more !!!
+    #plt.plot(cis, valeur[:,8]/vol, color = 'red', label = 'sigma xx')
+    #plt.plot(cis, valeur[:,9]/vol, color = 'blue', label = 'sigma yy')
+    
     plt.title('Stress tensor component xx and yy, and stress invariant p versus constrained shearing')
     plt.xlabel('Constrained shearing (%)')
     plt.ylabel('Stress (Pa)')
@@ -335,38 +362,24 @@ def graph_ela_comp(data): # plot for the elastic compression
     data.readline()
     valeur = np.loadtxt(data)
     
-    time = (valeur[:,0] - valeur[0,0])*1E-5
+    time = (valeur[:,0] - valeur[0,0])
     vol = (valeur[:,7]*valeur[:,8])
     
-    # Coordination number
-    plt.figure(figsize= (10, 5))
-    plt.plot(time, valeur[:,2], color = 'black', label = 'z')
-    plt.title('Coordination number z versus time t - elastic compression')
-    plt.xlabel('Time t (s)')
-    plt.ylabel('Coordination number z')
-    plt.legend()
-    plt.savefig('comp_z_vs_time.png')
-    plt.show()
-    
-    # Packing fraction
-    plt.figure(figsize= (10, 5))
-    plt.plot(time, valeur[:,3], color = 'black', label = 'z')
-    plt.title('Packing fraction versus time t - elastic compression')
-    plt.xlabel('Time t (s)')
-    plt.ylabel('Packing fraction')
-    plt.legend()
-    plt.savefig('comp_dens_vs_time.png')
-    plt.show()
-
     # Stress
     plt.figure(figsize= (10, 5))
-    plt.plot(time, valeur[:,11]/vol, color = 'green', label = 'sigma xy')
+    
+    # !!! put line as a comment if using version v3 or v4 !!!
     plt.plot(time, valeur[:,12]/vol, color = 'black', label = 'p')
-    plt.title('Stress tensor component xx yy xy and stress invariant p versus time t - elastic compression')
+    
+    # !!! put lines as a coment if using version v5 or more !!!
+    #plt.plot(time, valeur[:,9]/vol, color = 'red', label = 'sigma xx')
+    #plt.plot(time, valeur[:,10]/vol, color ='blue', label = 'sigma yy')
+    
+    plt.title('Stress tensor p versus time t - elastic compression')
     plt.xlabel('Time t (s)')
     plt.ylabel('Stress xx yy xy (Pa)')
     plt.legend()
-    plt.savefig('comp_sigma_vs_time.png')
+    plt.savefig('ela_comp_sigma_vs_time.png')
     plt.show()
     return
 
@@ -376,39 +389,19 @@ def graph_ela_cis(data): # plot for the elastic shearing
     valeur = np.loadtxt(data)
     
     # Variables 
-    vol = (valeur[:,6]*valeur[:,7]) # computation of the volume (1/packing fraction)
-    cis = ((valeur[:,0] - 2.5E6)*1E-5) # constrained shear
-    
-    # Density
-    plt.figure(figsize= (10, 5))
-    plt.plot(cis, valeur[:,5], label = 'z')
-    plt.title('Packing fraction versus constrained shearing - elastic shearing')
-    plt.xlabel('Constrained shearing (%)')
-    plt.ylabel('Packing Fraction')
-    plt.legend()
-    plt.savefig('cis_dens_vs_cis.png')
-    plt.show()
-    
-    # Normal stress
-    plt.figure(figsize= (10, 5))
-    plt.plot(cis, valeur[:,8]/vol, color = 'red', label = 'sigma xx')
-    plt.plot(cis, valeur[:,9]/vol, color = 'blue', label = 'sigma yy')
-    plt.plot(cis, valeur[:,11]/vol, color = 'pink', label = 'p')
-    plt.title('Stress tensor component xx and yy, and stress invariant p versus constrained shearing - elastic shearing')
-    plt.xlabel('Constrained shearing (%)')
-    plt.ylabel('Stress (Pa)')
-    plt.legend()
-    plt.savefig('cis_sigma_vs_txcis.png')
-    plt.show()
+    #vol = (valeur[:,6]*valeur[:,7]) # computation of the volume (1/packing fraction)
+    defo = ((valeur[:,6]*valeur[:,7] - valeur[0,6]*valeur[0,7]) / (valeur[0,6]*valeur[0,7]))
+    time = ((valeur[:,0] - 2.5E6)*1E-5) # constrained shear
     
     # Shear stress
     plt.figure(figsize= (10, 5))
-    plt.plot(cis, valeur[:,10]/vol, label = 'sigma xy')
+    #plt.plot(time, valeur[:,10]/vol, label = 'sigma xy')
+    plt.plot(time, defo, label = 'contrained shearing')
     plt.title('Stress tensor shear xy versus constrained shearing - elastic shearing')
     plt.xlabel('Constrained shearing (%)')
     plt.ylabel('Stress tensor shear (Pa)')
     plt.legend()
-    plt.savefig('cis_cis_vs_txcis.png')
+    plt.savefig('ela_cis_cis_vs_txcis.png')
     plt.show()
     return
 
@@ -416,6 +409,9 @@ def graph_ela_cis(data): # plot for the elastic shearing
 
 # Sort the log.lammps file 
 # Opening of the files
+
+# !!! Opening of the log.lammps file !!!
+# !!! You need to edit the path to open the right source file in the right place !!!
 
 fichier_source = open('/Users/aurelienrigotti/Nextcloud/Documents/Simulations/periodique/log.lammps','r')
 #fichier_source = open('/Users/aurelienrigotti/Nextcloud/Documents/Simulations/Versions_anterieur/Simulations_v3/log.lammps', 'r')
