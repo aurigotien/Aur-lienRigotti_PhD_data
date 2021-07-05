@@ -1,0 +1,28 @@
+### Simulation parameters ###
+
+    # Simulation parameters
+	dimension    2 # 2D simulation
+    boundary     p fm p # Bondary condtion, f fixed condition, p periodic condition
+    
+	atom_style   sphere 0 # Spherical particles (define diameters and weigth for every particles create)
+	newton       off # off = no action/reaction
+	comm_modify  vel yes 
+    units        si
+    
+    # géométrie
+	region boite block 0 100 0 100 -0.5 0.5 units box # Create a region "boite" 100x100x1
+    box          tilt large
+	create_box   1 boite # Create the simulation box "boite" with 1 type of grains
+    
+	neighbor     0.1 bin # Update frequency of the particle list 
+	neigh_modify delay 0 # Unpdate frequency of the particle list every 0 step of time
+    
+    # Sample region
+    region       zone_de_chute block 0 100 89 100 -0.5 0.5 units box # create a région where the grains will falled
+    
+    # Variable of the problem
+    variable     nbr_grain equal 809
+    variable     dmax equal 4.0
+    variable     dmin equal 3.0
+  
+### End of initialisation step ###

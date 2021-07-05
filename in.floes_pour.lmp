@@ -1,0 +1,43 @@
+### Pouring of granular particles ###
+
+## Output command ##
+    
+#dump		depot_img all image 500000 depot.*.jpg type type &
+    #            zoom 1.6 adiam 4.0
+    #dump_modify	depot_img pad 5
+    
+    #dump        depot_grain all movie 500 depot_grain.avi type type &
+    #            zoom 1.6 adiam 4.0 # crée une vidéo du dépot des grains
+    #dump_modify depot_grain pad 5
+
+## Definition of the interaction between particles ## 
+# arg : normal contact, tangential contact, normal damping, tangential damping, yield coefficient, 0 to exclude gamma_t
+	pair_style  gran/hooke/history 1E5 0.0 1E3 0.0 0.0 0 # Hookian contact between particles without friction
+	pair_coeff	* *
+    
+# Add normal reaction on the walls paroie_y and yplane
+    fix	        paroiy all wall/gran hooke/history 2E7 0.0 3E2 0.0 0.0 0 &
+                yplane 0 NULL 
+    
+## Simulation of the grains pouring ##
+
+    fix	gravite all gravity 1.0 spherical 0.0 -180.0 # add gravity
+    fix          sur_amortissement all viscous 2.0 # viscous damping
+    
+    timestep    1E-4 # simulation time step
+    
+	fix         temp_cste all temp/berendsen 300.0 300.0 1E2 # define a fixed temperature for the simulation 
+    
+# Pour N grains, vol set the packing fraction (max 0.6), one : unic diam d / range : diam d in an interval 
+    fix         depot all pour 1000 1 100 vol 0.5 10 &
+                diam poly 2 3.0 0.5 4.0 0.5 region zone_de_chute
+    
+    fix         calcul_v_m all nve/sphere disc #  compute the velocity of the atoms and the angular momentum for every sphere    
+    
+    fix         2Dsimu all enforce2d # ensure 2D simulation by zeroing strenght/speed in z direction
+
+## End of pouring ##
+
+    run	        1500000 # 1 500 000 step of simulation 
+    
+### Enb of pouring step ###

@@ -1,0 +1,67 @@
+### Restart simulation ###
+### Elastic unixial shearing of granular media ###
+    
+    # Begining of the simulation
+    timestep     1E-5 # simulation time step
+
+## Computation ## 
+ 
+    # Stress of the system  
+    compute      sigma all stress/atom NULL virial # computation of the stress tensor componenent for each atoms
+    compute      moy_sigma all reduce sum c_sigma[*] # su m the stress tensor over every atoms
+    
+    variable     p equal "(c_moy_sigma[1]+c_moy_sigma[2])/2"
+    variable     sigma_xx equal c_moy_sigma[1]
+    variable     sigma_yy equal c_moy_sigma[2]
+    variable     sigma_xy equal c_moy_sigma[4]
+    
+    # Neighbor computation
+    compute      voisin all contact/atom # compute number of neighbor  at d = dmin of the center of each grains
+    compute      moy_voisin all reduce ave c_voisin # mean of the neighbor over all the grains
+    
+    # Grains movement
+    compute      u_cis all displace/atom
+    compute      u_moy_cis all reduce ave c_u_cis[*][*]
+    
+     # Temperature
+    compute      temp_ela_sh all temp/sphere
+
+## Output command ##
+
+    thermo       1000 # output every 1 000 step of time
+    thermo_style custom & 
+                 step atoms c_temp_ela_sh & 
+                 c_moy_voisin density &
+                 lx ly xy & 
+                 v_sigma_xx v_sigma_yy v_sigma_xy & 
+                 v_p c_u_moy_cis[1] c_u_moy_cis[2]
+    
+    # Graphic output
+    #dump		 cis_ela_img all image 5000 cis_ela.*.jpg type type &
+    #             zoom 1.6 adiam 4.0
+    #dump_modify	 cis_ela_img pad 5
+    
+    #dump         evo_voisin all custom 1000 voisin.txt id c_voisin # output the number of neighbor / grain in a text file 
+ 
+    #dump         shearing_ela all movie 500 shearing_ela.avi type type &
+    #             zoom 1.2 adiam 4.0 # create a movie of the shearing
+	#dump_modify  shearing_ela pad 5
+   
+## Sample shearing ##   
+# Define of the shearing with constant speed imposed by tilting the simulation box + unixial compression
+    
+    fix          sur_amortissement all viscous 2.0 # viscous damping
+    fix          temp_cste all temp/berendsen 0.0 0.0 100 # set a fixed temperature for the simulation     
+    
+    fix          cis_ela all deform 1 xy wiggle 0.1 0.1 units box
+   
+    fix          calcul_v_m all nve/sphere disc #  compute the velocity of the atoms and the angular momentum for every sphere    
+        
+    fix          2Dsimu all enforce2d # ensure 2D simulation by zeroing strenght/speed in z direction
+
+    
+## End of elastic shearing ##
+    
+	run          50000 #  50 000 step of simulation 
+    
+### End of elastic shearing step ###
