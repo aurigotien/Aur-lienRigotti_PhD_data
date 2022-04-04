@@ -1,0 +1,71 @@
+### Relaxation of granular media ###
+    
+	## Computation ## 
+ 
+		# Neighbor computation
+		compute		voisin all coord/atom cutoff ${CUTOFF} # compute number of neighbor  at d = dmin of the center of each grains
+    		compute		moy_voisin all reduce ave c_voisin # mean of the neighbor over all the grains
+        
+    		# Stress of the system
+    		compute      		sigma_relax all stress/atom NULL virial  # computation of the stress tensor componenent for each atoms
+    		compute      		moy_sigma_relax all reduce sum c_sigma_relax[*] # sum the stress tensor over every atoms
+    
+    		# Kinetic energy of the grains
+    		compute      		nrj_cin all ke/atom
+    		compute      		moy_nrj_cin all reduce ave c_nrj_cin[*]
+    
+    		# Grains movement
+    		compute      		u_relax all displace/atom
+    		compute      		u_moy_relax all reduce ave c_u_relax[*][*]
+    	
+    		# Temperature 
+    		compute      		temperature all temp/sphere
+  	
+	## Variable ## 
+		
+		#variable_S_GRAINS#
+	    	variable 		LX equal lx
+	    	variable 		LY equal ly
+	    	variable 		DT equal 1E-4 # discretization time 
+	    	variable 		PHI equal "v_S_GRAINS / (v_LX*v_LY)"
+    		variable    		S_XX equal c_moy_sigma_relax[1]
+    		variable    		S_YY equal c_moy_sigma_relax[2]
+    		variable    		S_XY equal c_moy_sigma_relax[4]
+    		variable    		P equal "(c_moy_sigma_relax[1]+c_moy_sigma_relax[2])/2"
+    		variable    		STEP_RELAX equal 1500000
+    
+   		# create a file to compute initial shear/bulk modulus
+   		restart 		${STEP_RELAX} ini.restart
+
+	## Relaxation of the sample ##
+    
+    		# Beginning of the simulation
+    		timestep    		${DT} # simulation time step
+    		fix         		over_damp all viscous ${VISC} # viscous damping
+		fix          		calcul_v_m all nve/sphere disc #  compute the velocity of the atoms and the angular momentum for every sphere    
+		fix         		2Dsimu all enforce2d # ensure 2D simulation by zeroing strenght/speed in z direction
+
+	## Output command ##
+    
+    		reset_timestep 	0
+    		thermo       		10000 # output every 100 000 step of time
+    		thermo_style 		custom step atoms c_temperature c_moy_voisin &
+    	 	            		v_PHI press c_u_moy_relax[1] c_u_moy_relax[2] &
+    		             		lx ly c_moy_nrj_cin &
+    		             		v_S_XX v_S_YY v_S_XY &
+    		             		v_P
+    
+    		dump		 	relaxation_img all image 200000 relaxation.*.jpg type type &
+    			             	zoom 1.6 adiam 1.5
+    		dump_modify	 	relaxation_img pad 5
+    
+		#dump         		relaxation all movie 100000 relaxation.avi type type &
+    		#             		zoom 1.6 adiam 1.5 # create a video of the relaxation
+    		#dump_modify 		relaxation pad 5 
+    
+	## End of relaxation ##
+
+     		run         		${STEP_RELAX} # step of simulation
+     
+### End of relaxation step ###       
+   
