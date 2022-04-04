@@ -1,0 +1,92 @@
+### Uniaxial shearing ###
+    
+    	## Stress, coordination number and grain movement computation ##
+ 
+    		# Neighbor computation
+    		compute	voisin all coord/atom cutoff ${CUTOFF} # compute number of neighbor at d = dmin of the center of each grains
+    		compute	moy_voisin all reduce ave c_voisin # mean of the neighbor over all the grains
+    
+    		# Stress of the system
+    		compute      	sigma all stress/atom NULL virial # computation of the stress tensor componenent for each atoms
+    		compute      	moy_sigma all reduce sum c_sigma[*] # sum the stress tensor over every atoms
+    
+   		# Grains movement
+    		compute      	u_floes all displace/atom 
+    		compute      	u_moy_floes all reduce ave c_u_floes[*][*]
+    
+    		# Temperature
+    		compute      	temperature all temp/sphere
+    
+	## Variable ##
+		
+		variable 	DT equal 1E-4 # discretization time 
+		variable 	N_STEP equal "v_SH_LEN / v_DT" # number of step of simulations
+		variable     	S_XX equal c_moy_sigma[1]
+    		variable     	S_YY equal c_moy_sigma[2]
+    		variable     	S_XY equal c_moy_sigma[4]
+    		#variable_S_GRAINS#
+    		variable 	LX equal lx
+    		variable 	LY equal ly
+    		variable 	SIN_A equal sin((v_PI*cellgamma)/180)
+    		variable 	PHI equal "v_S_GRAINS / (v_LX*v_LY*v_SIN_A)"
+    		variable    	SHEAR equal 2.5E-3 # imposed shear rate
+    		variable     	P equal "(c_moy_sigma[1]+c_moy_sigma[2])/2"
+    		variable     	COMP equal 5000
+    		variable     	FILE equal 1E3
+    		variable 	V_FILE equal 1E5
+    
+   		# Elastic properties files #
+
+    		# create a file to restart a simulation every FILE step of times 
+    		restart 	${FILE} endo.restart
+    	
+    	## Beginning of the simulation ## 
+
+    		timestep	${DT} # simulation time step 
+
+	## Add grain/grain friction ##
+
+    		pair_style   	gran/hertz/history ${K_N} ${K_T} ${GAMMA_N} ${GAMMA_T} ${MU} 1 # contact Hookien entre particule sans friction
+		pair_coeff	* * 
+
+	## Shearing of the sample ##
+    
+		# Define of the shearing with constant speed imposed by tilting the simulation box + unixial compression
+    		fix         	over_damp all viscous ${VISC} # viscous damping
+    		fix         	cisaillement all deform 1 & 
+        	         	xy erate ${SHEAR} & 
+        	         	units box remap v 
+    		fix         	comp_floes all nph/sphere & 
+                		y ${COMP} ${COMP} 10 &
+    	             		couple none disc 
+    		fix         	2Dsimu all enforce2d # ensure 2D simulation by zeroing strenght/speed in z direction
+
+	## Output command ##
+
+    		reset_timestep 0
+    		thermo       	1000 # output every 10 000 step of time
+    		thermo_style 	custom & 
+                 		step atoms c_temperature press & 
+                 		c_moy_voisin v_PHI &
+                		lx ly cellgamma & 
+                		v_S_XX v_S_YY v_S_XY &
+                		v_P c_u_moy_floes[1] c_u_moy_floes[2] 
+
+   		# Graphic output
+    		dump		cisaillement_img all image 200000 cisaillement.*.jpg type type &
+               	  	zoom 0.9 adiam 1.5
+    		dump_modify	cisaillement_img pad 5 
+    		
+    		dump 		position all custom ${V_FILE} u_v_file.txt & 
+    				id x y vx vy diameter c_voisin
+    		# create a dump file with the position/speed of the grains every V_FILE iteration 
+    
+    		#dump         	shearing all movie 500 shearing.avi type type &
+    		#             	zoom 1.2 adiam 1.5 # create a video of the shearing 
+		#dump_modify  	shearing pad 5
+
+	## End of shearing ##
+    
+		run          	${N_STEP} # step of simulation 
+    
+### End of shearing step ###
