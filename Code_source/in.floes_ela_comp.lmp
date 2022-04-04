@@ -1,0 +1,80 @@
+### Restart simulation ###
+	## Elastique biaxial compression of granular media ###
+	
+		# Add action/reaction between grains
+		newton       	on # off = no action/reaction	
+    	
+   	## Computation ##
+   	
+   		# Variable 
+   		variable 	CUTOFF equal 1.4
+
+    		# Neighbor computation
+    		compute      	voisin all coord/atom cutoff ${CUTOFF} # compute number of neighbor  at d = dmin of the center of each grains
+    		compute      	moy_voisin all reduce ave c_voisin # mean of the neighbor over all the grains
+    
+    		# Stress of the system 
+    		compute      	sigma_comp all stress/atom NULL virial # computation of the stress tensor componenent for each atoms
+    		compute      	moy_sigma_comp all reduce sum c_sigma_comp[*] # sum the stress tensor over every atoms
+    
+	## Compute variable ##
+
+    		# Simulation parameters 
+    		variable     	A_COMP equal 1E-5 # intermediate variable to applied the right stress on the sample 
+    		variable     	TP_COMP equal 1 # period of oscillation of the system
+    		variable 	N_STEP equal 1E5 # number of step of simulations
+    		variable 	DT equal 1E-4 # discretization time 
+    		
+    		#variable_VISC#
+    		
+    		# Monitoring of the packing fraction of the system
+    		#variable_S_GRAINS#
+    		variable 	LX equal lx # length of the simulation box
+    		variable 	LY equal ly # higth of the simulation box
+    		variable 	PHI equal "v_S_GRAINS / (v_LX*v_LY)" # compute the packing fraction
+    		
+    		# Monitoring of the stress state of the system
+    		variable     	S_XX equal c_moy_sigma_comp[1] # normal stress S_xx
+    		variable     	S_YY equal c_moy_sigma_comp[2] # normal stress S_yy
+    		variable     	S_XY equal c_moy_sigma_comp[4] # normal stress S_xy
+    		variable     	P equal "(c_moy_sigma_comp[1]+ c_moy_sigma_comp[2])/2" # mean stress P
+    	
+    	## Beginning of simulation ##
+	
+		timestep     	${DT} # simulation time step
+    	
+	## Stress control test ##
+
+    		fix          	sur_amortissement all viscous ${VISC} # viscous damping
+    		
+    		# Elastic oscillatory strain controlled biaxial compression test
+    		fix          	ela_comp all deform 1 x wiggle ${A_COMP} ${TP_COMP} &
+                               y wiggle ${A_COMP} ${TP_COMP} &
+                               units box remap v
+                               
+    		fix          	2Dsimu all enforce2d # ensure 2D simulation by zeroing strenght/speed in z direction
+    		
+	## Output command ##
+	
+    		reset_timestep 0
+    		thermo       	500 # output every 500 step of time
+    		
+    		# (0) number of the step ; (1) number of atoms ; (2) mean coordination number ; (3) packing fraction ; (4) horizontal simulation box length 
+    		# (5) vertical simulation box length ; (6) stress S_xx ; (7) stress S_yy ; (8) stress S_xy ; (9) mean stress P
+    		thermo_style 	custom &
+    				step atoms c_moy_voisin v_PHI lx &
+                 		ly v_S_XX v_S_YY v_S_XY &
+                 		v_P 
+    
+    		#dump		comp_ela_img all image 20000 comp_ela.*.jpg type type zoom 1.6
+    		#dump_modify	comp_ela_img pad 5 adiam 1 ${DMIN} adiam 2 ${DMAX}
+    
+		#dump         	compression all movie 500 compression.avi type type &
+				#zoom 1.6 adiam 1.5 # create a video of the compression
+		#dump_modify  	compression pad 5
+	
+	## End of elastic compression ##
+
+		run	        ${N_STEP} #  100 000 step of simulation 
+    
+### End of elastic compression step ###
