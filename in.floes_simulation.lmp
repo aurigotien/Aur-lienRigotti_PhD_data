@@ -1,0 +1,278 @@
+### Simulation of granular media ###
+	## Initialisation -------------------------------------------------------------------------------------------- ##
+   
+   		include	in.floes_initialisation.lmp # initialise the simulation
+
+	## Compression of the sample --------------------------------------------------------------------------------- ##
+    		# Compression of the granular media
+    		include      	in.floes_compression.lmp # biaxial compression of the sample by applying a pressure     
+
+		# Uncompute - remove the computation to call them further in the code
+    		uncompute    	voisin
+    		uncompute    	moy_voisin
+    		uncompute    	sigma_comp
+    		uncompute    	moy_sigma_comp
+
+		# Remove useless variable 
+		variable 	COMP delete 
+    		variable 	STEP_COMP delete 
+    		variable 	DT delete
+    		
+    		variable 	S_GRAINS delete  
+    		variable 	L_X delete
+    		variable 	L_Y delete 
+    		variable 	PHI delete
+
+    		variable	S_XX delete
+    		variable 	S_YY delete
+    		variable 	S_XY delete
+    		variable 	P delete
+    	
+		# Unfix
+		unfix        	comp # stop the sample compression
+    		unfix 		calcul_v_m 
+    		unfix        	2Dsimu
+    		
+    		# Clear graphic output 
+    		undump       	compression_img 
+    		#undump       	compression
+    
+	## Relaxation of the sample --------------------------------------------------------------------------------- ##
+
+    		# Compression of the granular media
+    		include      	in.floes_relaxation.lmp # uniaxial compression of the sample by applying a pressure     
+    		
+		# Uncompute - remove the computation to call them further in the code
+    		uncompute    	voisin
+    		uncompute    	moy_voisin
+    		uncompute    	sigma_relax
+    		uncompute    	moy_sigma_relax
+
+		# Remove useless variable 
+		variable 	DT delete
+    		variable 	STEP_RELAX delete
+		variable 	S_GRAINS delete
+		variable 	L_X delete
+    		variable 	L_Y delete 
+    		variable 	PHI delete
+    		variable 	S_XX delete
+    		variable 	S_YY delete
+    		variable 	S_XY delete
+    		variable 	P delete
+    		
+    		# Unfix
+		unfix 		over_damp
+    		unfix        	calcul_v_m 
+    		unfix        	2Dsimu
+    		
+    		# Clear graphic output 
+    		undump       	relaxation_img 
+    		#undump       	relaxation
+    		
+	## Sample shearing -------------------------------------------------------------------------------------------- ##
+		
+		clear
+		read_restart 	ini.restart.500000
+    		include      	in.floes_shearing.lmp # shear the sample under constant speed/loading
+    		clear # reinitialise the simulation to determinate the elastic mechanical properties
+    
+	## Elastic properties --------------------------------------------------------------------------------------- ##
+
+		# Elastic compression modulus
+	
+    		# beginning elastic compression 1 
+    		read_restart 	ini.restart.500000
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 1 
+    
+    		# beginning elastic compression 2
+    		read_restart 	endo.restart.1000
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 2
+    
+    		# beginning elastic compression 3
+    		read_restart 	endo.restart.2000
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 3
+    	
+    		# beginning elastic compression 4
+    		read_restart 	endo.restart.3000
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 4
+    
+    		# beginning elastic compression 5
+    		read_restart 	endo.restart.4000
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 5
+    
+    		# beginning elastic compression 6
+    		read_restart 	endo.restart.5000
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 6
+   
+    		# beginning elastic compression 7
+    		read_restart 	endo.restart.10000
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 7
+    
+    		# beginning elastic compression 8
+    		read_restart 	endo.restart.30000
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 8
+    
+    		# beginning elastic compression 9
+    		read_restart 	endo.restart.50000
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 9
+    
+    		# beginning elastic compression 10
+    		read_restart 	endo.restart.80000
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 10
+    
+    		# beginning elastic compression 11
+    		read_restart 	endo.restart.100000
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 11
+    
+    		# beginning elastic compression 12
+    		read_restart 	endo.restart.200000
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 12
+    
+    		# beginning elastic compression 13
+    		read_restart 	endo.restart.300000
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 13
+    
+    		# beginning elastic compression 14
+    		read_restart 	endo.restart.400000 
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 14
+    
+    		# beginning elastic compression 15
+    		read_restart 	endo.restart.500000 
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 15
+    
+    		# beginning elastic compression 16
+    		read_restart 	endo.restart.600000 
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 16
+
+		# Elastic shearing
+		
+    		# beginning elastic shearing 1 
+    		read_restart 	ini.restart.500000
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 1 
+    
+    		# beginning elastic shearing 2
+    		read_restart 	endo.restart.1000
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 2
+    
+    		# beginning elastic shearing 3
+    		read_restart 	endo.restart.2000
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 3
+    
+    		# beginning elastic shearing 4
+    		read_restart 	endo.restart.3000
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 4
+    
+    		# beginning elastic shearing 5
+    		read_restart 	endo.restart.4000
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 5
+    
+    		# beginning elastic shearing 6
+    		read_restart 	endo.restart.5000
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 6
+   
+    		# beginning elastic shearing 7
+    		read_restart 	endo.restart.10000
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 7
+    
+    		# beginning elastic shearing 8
+    		read_restart 	endo.restart.30000
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 8
+    
+    		# beginning elastic shearing 9
+    		read_restart 	endo.restart.50000
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 9
+    
+    		# beginning elastic shearing 10
+    		read_restart 	endo.restart.80000
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 10
+    
+    		# beginning elastic shearing 11
+    		read_restart 	endo.restart.100000
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 11
+    
+    		# beginning elastic shearing 12
+    		read_restart 	endo.restart.200000 
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 12
+    
+    		# beginning elastic shearing 13
+    		read_restart 	endo.restart.300000 
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 13
+    
+    		# beginning elastic shearing 14
+    		read_restart 	endo.restart.400000 
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 14
+    
+    		# beginning elastic shearing 15
+    		read_restart 	endo.restart.500000 
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 15
+    
+    		# beginning elastic shearing 16
+    		read_restart 	endo.restart.600000
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 16
+    
+### End of simulation ###
+### End ###
