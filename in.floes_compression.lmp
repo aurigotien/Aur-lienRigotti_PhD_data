@@ -1,0 +1,71 @@
+### Biaxial compression of granular media ###
+
+		neigh_modify 		every 1 delay 10 # Update frequency of the particle list every 1 step of time
+   
+   	## Computation ## 
+
+		# Neighbor computation
+    		compute 		voisin all contact/atom 
+    		compute		moy_voisin all reduce ave c_voisin # mean of the neighbor over all the grains
+    
+   	 	# Stress of the system 
+   	 	compute     		sigma_comp all stress/atom NULL virial # computation of the stress tensor componenent for each atoms
+   	 	compute      		moy_sigma_comp all reduce sum c_sigma_comp[*] # sum the stress tensor over every atoms
+    
+	## Variable ##
+	    	
+	    	# Simulation parameters 
+	    	variable 		DT equal 1E-3 # discretization time 
+	    	variable 		T_COMP equal 30 #4.58E1 # # time of simulation (s) phi ~ 0.8 | STEP_COMP = 45,8 s , phi ~ 0.7 | STEP_COMP = 30 s
+	    	variable     		STEP_COMP equal "v_T_COMP / v_DT" # number of step of simulation phi ~ 0.8 | STEP_COMP = 45000 , phi ~ 0.7 | STEP_COMP = 41000
+	    	variable		THERMO_COMP equal "v_STEP_COMP / 50"
+	    	variable		STEP_COMP_DUMP equal "v_STEP_COMP / 100"
+	    	variable     		COMP equal -1E-2 # compression strain rate
+	    	
+	    	# Packing fraction monitoring
+	    	#variable_S_GRAINS#
+	    	variable 		LX equal lx
+	    	variable 		LY equal ly
+	    	variable 		PHI equal "v_S_GRAINS / (v_LX*v_LY)" # compute the packing fraction 
+	    	
+	    	# Stress monitoring 
+	    	variable     		S_XX equal c_moy_sigma_comp[1] # normal stress S_xx
+	    	variable     		S_YY equal c_moy_sigma_comp[2] # normal stress S_yy
+	    	variable     		S_XY equal c_moy_sigma_comp[4] # shear stress S_xy
+	    	variable     		P equal "(c_moy_sigma_comp[1] + c_moy_sigma_comp[2])/2" # mean stress P
+		
+	# Beginning of the simulation
+	
+   		timestep     		${DT} # simulation time step = DT
+      
+	## Fix for biaxial compression ##
+		
+		# Strain controled biaxial compression test
+		fix          		comp all deform 1 &
+					x erate ${COMP} &
+					y erate ${COMP} &
+					units box remap none
+		
+		fix          		calcul_v_m all nve/sphere disc #  compute the velocity of the atoms and the angular momentum for every sphere   
+	     	fix          		2Dsimu all enforce2d # ensure 2D simulation by zeroing strenght/speed in z direction
+
+	## Output commmand ##
+    
+    		thermo      		${THERMO_COMP} # output every 10 000 time step
+    		
+    		# (0) number of the step ; (1) number of atoms ; (2) mean coordination number ; (3) packing fraction ; (4) horizontal simulation box length 
+    		# (5) vertical simulation box length ; (6) stress S_xx ; (7) stress S_yy ; (8) stress S_xy ; (9) mean stress P
+    		thermo_style 		custom &
+    					step atoms c_moy_voisin v_PHI lx &
+    					ly v_S_XX v_S_YY v_S_XY v_P
+    		
+    		# Graphic output
+    		dump 			comp_mm all custom ${STEP_COMP_DUMP} preparation_1.txt &
+					id x y diameter vx vy fx fy c_voisin
+
+	## End of compression ##
+
+    		run          		${STEP_COMP} 
+    		print 		"--------------------------- PHI = ${PHI} ----------------------------"
+                      
+### End of compression step ###

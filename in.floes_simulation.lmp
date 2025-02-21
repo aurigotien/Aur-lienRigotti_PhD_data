@@ -1,0 +1,331 @@
+### Simulation of granular media ###
+
+	## Initialisation -------------------------------------------------------------------------------------------- ##
+   
+   		include	in.floes_initialisation.lmp # initialise the simulation
+
+	## Compression of the sample --------------------------------------------------------------------------------- ##
+    		# Compression of the granular media
+    		include      	in.floes_compression.lmp # biaxial compression of the sample by applying a pressure     
+
+		# Uncompute - remove the computation to call them further in the code
+    		uncompute    	voisin
+    		uncompute    	moy_voisin
+    		uncompute    	sigma_comp
+    		uncompute    	moy_sigma_comp
+
+		# Remove useless variable 
+		variable 	DT delete
+		variable 	T_COMP delete
+		variable 	STEP_COMP delete 
+		variable	THERMO_COMP delete
+		variable 	STEP_COMP_DUMP delete
+		variable 	COMP delete 
+    		
+    		variable 	S_GRAINS delete  
+    		variable 	L_X delete
+    		variable 	L_Y delete 
+    		variable 	PHI delete
+
+    		variable	S_XX delete
+    		variable 	S_YY delete
+    		variable 	S_XY delete
+    		variable 	P delete
+    	
+		# Unfix
+		unfix        	comp # stop the sample compression
+    		unfix 		calcul_v_m 
+    		unfix        	2Dsimu
+    		
+    		# Clear graphic output 
+    		undump	comp_mm
+    
+	## Relaxation of the sample --------------------------------------------------------------------------------- ##
+	
+    		# Compression of the granular media
+    		include      	in.floes_relaxation.lmp # relaxation of the sample 
+    		
+		# Uncompute - remove the computation to call them further in the code
+    		uncompute    	voisin
+    		uncompute    	moy_voisin
+    		uncompute    	sigma_relax
+    		uncompute    	moy_sigma_relax
+
+		# Remove useless variable
+		variable 	RELAX_LEN delete
+		variable 	DT delete
+    		variable 	STEP_RELAX delete
+    		variable 	THERMO_RELAX delete
+    		variable 	THERMO_DUMP delete
+		variable 	S_GRAINS delete
+		variable 	L_X delete
+    		variable 	L_Y delete 
+    		variable 	PHI delete
+    		variable 	S_XX delete
+    		variable 	S_YY delete
+    		variable 	S_XY delete
+    		variable 	P delete
+    		
+    		# Unfix
+    		unfix        	calcul_v_m 
+    		unfix        	2Dsimu
+    		
+    		# Clear graphic output 
+    		undump	relax_mm
+    	
+    	## Precompression of the sample --------------------------------------------------------------------------------- ##
+	
+    		# Compression of the granular media
+    		include      	in.floes_precomp.lmp # precompression of the sample by applying a biaxial pressure    
+    		
+	## Sample shearing -------------------------------------------------------------------------------------------- ##
+		
+		clear
+		read_restart 	ini.restart.5000000
+		#read_restart 	auto_save_1.restart
+    		include      	in.floes_shearing.lmp # shear the sample under constant speed/loading
+    		clear # reinitialise the simulation to determinate the elastic mechanical properties
+    
+	## Elastic properties --------------------------------------------------------------------------------------- ##
+
+		# Elastic compression modulus
+	
+    		# beginning elastic compression 1 
+    		read_restart 	ini.restart.5000000
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 1 
+    
+    		# beginning elastic compression 2
+    		#read_restart_2#
+    		include      	in.floes_ela_comp.lmp
+    		#include      	in.floes_ela_comp_dump_2.lmp
+    		clear
+    		# end of elastic compression 2
+    
+    		# beginning elastic compression 3
+    		#read_restart_3#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 3
+    	
+    		# beginning elastic compression 4
+    		#read_restart_4#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 4
+    
+    		# beginning elastic compression 5
+    		#read_restart_5#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 5
+    
+    		# beginning elastic compression 6
+    		#read_restart_6#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 6
+   
+    		# beginning elastic compression 7
+    		#read_restart_7#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 7
+    
+    		# beginning elastic compression 8
+    		#read_restart_8#
+    		include      	in.floes_ela_comp.lmp
+    		#include      	in.floes_ela_comp_dump_8.lmp
+    		clear
+    		# end of elastic compression 8
+    
+    		# beginning elastic compression 9
+    		#read_restart_9#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 9
+    
+    		# beginning elastic compression 10
+    		#read_restart_10#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 10
+    
+    		# beginning elastic compression 11
+    		#read_restart_11#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 11
+    
+    		# beginning elastic compression 12
+    		#read_restart_12#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 12
+    
+    		# beginning elastic compression 13
+    		#read_restart_13#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 13
+    
+    		# beginning elastic compression 14
+    		#read_restart_14#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 14
+    
+    		# beginning elastic compression 15
+    		#read_restart_15#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 15
+    
+    		# beginning elastic compression 16
+    		#read_restart_16#
+    		include      	in.floes_ela_comp.lmp
+    		#include      	in.floes_ela_comp_dump_16.lmp
+    		clear
+    		# end of elastic compression 16
+    		
+    		# beginning elastic compression 17
+    		#read_restart_16#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 17
+    		
+    		# beginning elastic compression 18
+    		#read_restart_16#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 18
+    		
+    		# beginning elastic compression 19
+    		#read_restart_16#
+    		include      	in.floes_ela_comp.lmp
+    		clear
+    		# end of elastic compression 19
+
+		# Elastic shearing
+		
+    		# beginning elastic shearing 1 
+    		read_restart	ini.restart.5000000
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 1 
+    
+    		# beginning elastic shearing 2
+    		#read_restart_2#
+    		include      	in.floes_ela_cis.lmp
+    		#include 	in.floes_ela_cis_dump_2.lmp
+    		clear
+    		# end of elastic shearing 2
+    
+    		# beginning elastic shearing 3
+    		#read_restart_3#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 3
+    
+    		# beginning elastic shearing 4
+    		#read_restart_4#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 4
+    
+    		# beginning elastic shearing 5
+    		#read_restart_5#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 5
+    
+    		# beginning elastic shearing 6
+    		#read_restart_6#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 6
+   
+    		# beginning elastic shearing 7
+    		#read_restart_7#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 7
+    
+    		# beginning elastic shearing 8
+    		#read_restart_8#
+    		include      	in.floes_ela_cis.lmp
+    		#include      	in.floes_ela_cis_dump_8.lmp
+    		clear
+    		# end of elastic shearing 8
+    
+    		# beginning elastic shearing 9
+    		#read_restart_9#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 9
+    
+    		# beginning elastic shearing 10
+    		#read_restart_10#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 10
+    
+    		# beginning elastic shearing 11
+    		#read_restart_11#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 11
+    
+    		# beginning elastic shearing 12
+    		#read_restart_12#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 12
+    
+    		# beginning elastic shearing 13
+    		#read_restart_13#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 13
+    
+    		# beginning elastic shearing 14
+    		#read_restart_14#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 14
+    
+    		# beginning elastic shearing 15
+    		#read_restart_15#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 15
+    
+    		# beginning elastic shearing 16
+    		#read_restart_16#
+    		include      	in.floes_ela_cis.lmp
+    		#include 	in.floes_ela_cis_dump_16.lmp
+    		clear
+    		# end of elastic shearing 16
+    		
+    		# beginning elastic shearing 17
+    		#read_restart_17#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 17
+    		
+    		# beginning elastic shearing 18
+    		#read_restart_18#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 18
+    		
+    		# beginning elastic shearing 19
+    		#read_restart_19#
+    		include      	in.floes_ela_cis.lmp
+    		clear
+    		# end of elastic shearing 19
+    
+    
+### End of simulation ###
+### End ###
