@@ -1,0 +1,124 @@
+### Simulation granulence monitor ###
+
+		clear
+		
+	## Granulence --------------------------------------------------------------------------------------- ##
+
+		# Granulence computation
+		
+    		# beginning file 1 
+    		read_restart	ini.restart.5000000
+    		include      	in.floes_granulence_0.lmp
+    		clear
+    		# end file 1 
+    
+    		# beginning file 2
+    		#read_restart_2#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 2
+    
+    		# beginning file 3
+    		#read_restart_3#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 3
+    
+    		# beginning file 4
+    		#read_restart_4#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 4
+    
+    		# beginning file 5
+    		#read_restart_5#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 5
+    
+    		# beginning file 6
+    		#read_restart_6#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 6
+   
+    		# beginning file 7
+    		#read_restart_7#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 7
+    
+    		# beginning file 8
+    		#read_restart_8#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 8
+    
+    		# beginning file 9
+    		#read_restart_9#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 9
+    
+    		# beginning file 10
+    		#read_restart_10#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 10
+    
+    		# beginning file 11
+    		#read_restart_11#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 11
+    
+    		# beginning file 12
+    		#read_restart_12#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 12
+    
+    		# beginning file 13
+    		#read_restart_13#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 13
+    
+    		# beginning file 14
+    		#read_restart_14#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 14
+   
+    		# beginning file 15
+    		#read_restart_15#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 15
+    
+    		# beginning file 16
+    		#read_restart_16#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 16
+    		
+    		# beginning file 17
+    		#read_restart_16#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 17
+    		
+    		# beginning file 18
+    		#read_restart_16#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 18
+    		
+    		# beginning file 19
+    		#read_restart_16#
+    		include      	in.floes_granulence.lmp
+    		clear
+    		# end file 19
+    
+### End of granulence simulation ###
+### End ###

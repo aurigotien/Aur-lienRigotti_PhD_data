@@ -1,0 +1,91 @@
+### Elastic unixial shearing of granular media ###
+	
+		# Add action/reaction between grains
+		newton       	on # off = no action/reaction	
+		
+		neighbor      	80.0 bin # Update frequency of the particle list skin = 80 m
+		neigh_modify 	every 1 delay 1 # Update frequency of the particle list every 1 step of time
+		
+	## Computation ##
+        
+    		# Neighbor computation
+    		compute 	voisin all contact/atom 
+    		compute	moy_voisin all reduce ave c_voisin # mean of the neighbor over all the grains
+    		
+    		# Stress of the system  
+    		compute      	sigma all stress/atom NULL virial # computation of the stress tensor componenent for each atoms
+    		compute      	moy_sigma_cis all reduce sum c_sigma[*] # su m the stress tensor over every atoms
+    
+	## Variable ##
+		
+		# Simulation parameters 
+    		variable     	A_CIS equal 2E-3 # amplitude of oscillation of tilte (m)
+    		variable    	TP_CIS equal 5E-5 # period of oscillation of the system 
+    		variable 	N_STEP equal 2E3 # number of step of simulations
+    		#variable_DT#
+    		#variable_VISC#
+    		
+    		# Monitoring variable 
+    		variable 	THERMO equal "v_N_STEP / 400" # 1 dump every THERMO step 
+    		#variable 	IMG_DUMP equal "v_N_STEP / 40" # dump 40 images 
+    		variable	MM_FILE equal "v_N_STEP / 200" # create 201 coordination number file + force chain file
+    
+		# Simulated grain properties
+	    	# Hertzian contact coeff
+		variable 	K_N equal 1.1E9 # normal stiffness => true value 1.1E9
+		variable 	K_T equal 9.05E8 # tangential stiffness => true value 9.05E8
+		variable 	MU equal 0.7 # grain/grain friction coefficient
+		variable 	GAMMA_N equal 14.0 # normal damping coefficient => true value 2.49
+		variable	GAMMA_T equal 12.0 # tangential damping coefficient => true value 2.26
+    		
+    		# Monitoring of the packing fraction of the system
+    		variable 	LX equal lx # length of the simulation box
+    		variable 	LY equal ly # higth of the simulation box
+    		variable 	PHI equal 0 #"v_S_GRAINS / (v_LX*v_LY)" # compute the packing fraction
+    		
+    		# Monitoring of the stress state of the system
+    		variable     	S_XX equal c_moy_sigma_cis[1] # normal stress S_xx
+    		variable     	S_YY equal c_moy_sigma_cis[2] # normal stress S_yy
+    		variable     	S_XY equal c_moy_sigma_cis[4] # normal stress S_xy
+    		variable     	P equal "(c_moy_sigma_cis[1]+ c_moy_sigma_cis[2])/2" # mean stress P
+    		
+    	## Add grain/grain friction ##
+
+    		pair_style   	gran/hertz/history ${K_N} ${K_T} ${GAMMA_N} ${GAMMA_T} ${MU} 1 # Frictional hertzian contact with historical effect
+		pair_coeff	* * 
+    	
+    	## Beginning of simulation ##
+	
+		timestep     	${DT} # simulation time step
+   
+	## Sample shearing ##   
+		# Define the simple shear test with constant speed imposed by tilting the simulation box + unixial compression
+    		
+    		# Elastic oscillatory strain controled uniaxial shear test
+    		fix          	cis_ela all deform 1 &
+                  		xy wiggle ${A_CIS} ${TP_CIS} &
+                  		units box remap none
+                  		
+  		fix          	calcul_v_m all nve/sphere disc #  compute the velocity of the atoms and the angular momentum for every sphere    
+    		fix          	2Dsimu all enforce2d # ensure 2D simulation by zeroing strenght/speed in z direction
+    		
+	## Output command ##
+		
+    		thermo       	${THERMO} # output 400 values
+    		
+    		# (0) number of the step ; (1) number of atoms ; (2) mean coordination number ; (3) packing fraction ; (4) horizontal simulation box length 
+    		# (5) vertical simulation box length ; (6) angle of inclinaison of the box ; (7) stress S_xx ; (8) stress S_yy ; (9) stress S_xy ; 
+    		thermo_style 	custom & 
+                 		step atoms c_moy_voisin v_PHI lx &
+                 		ly cellgamma v_S_XX v_S_YY v_S_XY & 
+    
+    		# Graphic output
+		# create a dump file with the position/speed of the grains every Z_FILE iteration
+		#dump 		coordination all custom ${MM_FILE} mm_file_ela_cis_16.txt &
+		#		id x y diameter vx vy fx fy c_voisin
+
+	## End of elastic shearing ##
+    
+		run          	${N_STEP} # step of simulation 
+    
+### End of elastic shearing step ###

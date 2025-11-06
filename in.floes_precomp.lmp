@@ -1,0 +1,73 @@
+### Precompression of granular media ###
+
+		neigh_modify 		every 1 delay 100 # Update frequency of the particle list every 1 step of time
+    
+	## Computation ## 
+ 
+		# Neighbor computation
+    		compute 		voisin all contact/atom 
+    		compute		moy_voisin all reduce ave c_voisin # mean of the neighbor over all the grains
+    
+    		# Stress of the system
+    		compute      		sigma_pre_comp all stress/atom NULL virial  # computation of the stress tensor componenent for each atoms
+    		compute      		moy_sigma_pre_comp all reduce sum c_sigma_pre_comp[*] # sum the stress tensor over every atoms
+  	
+	## Variable ## 
+		
+		variable 		PRE_COMP_LEN equal 5000 # 5000 s of precompression
+		variable 		DT equal 1E-3 # discretization time 
+    		variable    		STEP_PRE_COMP equal "v_PRE_COMP_LEN / v_DT" # number of step of simulations
+    		
+    		variable 		RELAX_COMP equal 200
+    		variable 		THERMO_PRE_COMP equal "v_STEP_PRE_COMP / 100"
+    		variable 		THERMO_DUMP equal "v_STEP_PRE_COMP / 100" 
+    		
+    		# Simulation parameters 
+		#variable_PRE_COMP#
+		
+		#variable_S_GRAINS#
+	    	variable 		LX equal lx
+	    	variable 		LY equal ly
+	    	variable 		PHI equal "v_S_GRAINS / (v_LX*v_LY)"
+    		variable    		S_XX equal c_moy_sigma_pre_comp[1]
+    		variable    		S_YY equal c_moy_sigma_pre_comp[2]
+    		variable    		S_XY equal c_moy_sigma_pre_comp[4]
+    		variable    		P equal "(c_moy_sigma_pre_comp[1]+c_moy_sigma_pre_comp[2])/2"
+    		
+   		# create a file to compute initial shear/bulk modulus
+   		restart 		${STEP_PRE_COMP} ini.restart
+
+	## Precompression of the sample ##
+		
+    		# Beginning of the simulation
+    		timestep    		${DT} # simulation time step
+		
+		# Biaxial compression of the simulation box 	         	
+    		fix         		pre_comp_floes all nph/sphere & 
+    					x ${COMP} ${COMP} ${RELAX_COMP} &
+                			y ${COMP} ${COMP} ${RELAX_COMP} &
+    	             			disc    
+    	             				
+		fix         		2Dsimu all enforce2d # ensure 2D simulation by zeroing strenght/speed in z direction
+
+	## Output command ##
+    
+    		reset_timestep 	0
+    		thermo       		${THERMO_PRE_COMP} # output every THERMO_PRE_COMP step of time
+    		
+    		# (0) number of the step ; (1) number of atoms ; (2) mean coordination number ; (3) packing fraction ; (4) horizontal simulation box length 
+    		# (5) vertical simulation box length ; (6) stress S_xx ; (7) stress S_yy ; (8) stress S_xy ; (9) mean stress P
+    		thermo_style 		custom &
+    					step atoms c_moy_voisin v_PHI lx &
+    	 	            		ly v_S_XX v_S_YY v_S_XY v_P &
+    		
+    		# Graphic output
+    		dump 			precomp_mm all custom ${THERMO_PRE_COMP} preparation_3.txt &
+					id x y diameter vx vy fx fy c_voisin
+    
+	## End of precompression  ##
+
+     		run         		${STEP_PRE_COMP} # step of simulation
+     
+### End of precompression step ###       
+   

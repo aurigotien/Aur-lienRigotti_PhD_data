@@ -1,0 +1,127 @@
+### Simulation of relaxation of granular media ###
+
+		clear
+		
+	## Elastic properties --------------------------------------------------------------------------------------- ##
+
+		# Elastic shear viscosity
+		
+    		# beginning elastic shearing relaxation 1 
+    		read_restart	ini.restart.5000000
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 1 
+    
+    		# beginning elastic shearing relaxation 2
+    		#read_restart_2#
+    		include      	in.floes_ela_relax.lmp
+    		#include      	in.floes_ela_relax_dump_2.lmp
+    		clear
+    		# end of elastic shearing relaxation 2
+    
+    		# beginning elastic shearing relaxation 3
+    		#read_restart_3#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 3
+    
+    		# beginning elastic shearing relaxation 4
+    		#read_restart_4#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 4
+    
+    		# beginning elastic shearing relaxation 5
+    		#read_restart_5#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 5
+    
+    		# beginning elastic shearing relaxation 6
+    		#read_restart_6#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 6
+   
+    		# beginning elastic shearing relaxation 7
+    		#read_restart_7#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 7
+    
+    		# beginning elastic shearing relaxation 8
+    		#read_restart_8#
+    		include      	in.floes_ela_relax.lmp
+    		#include      	in.floes_ela_relax_dump_8.lmp
+    		clear
+    		# end of elastic shearing relaxation 8
+    
+    		# beginning elastic shearing relaxation 9
+    		#read_restart_9#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 9
+    
+    		# beginning elastic shearing relaxation 10
+    		#read_restart_10#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 10
+    
+    		# beginning elastic shearing relaxation 11
+    		#read_restart_11#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 11
+    
+    		# beginning elastic shearing relaxation 12
+    		#read_restart_12#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 12
+    
+    		# beginning elastic shearing relaxation 13
+    		#read_restart_13#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 13
+    
+    		# beginning elastic shearing relaxation 14
+    		#read_restart_14#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 14
+   
+    		# beginning elastic shearing relaxation 15
+    		#read_restart_15#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 15
+    
+    		# beginning elastic shearing relaxation 16
+    		#read_restart_16#
+    		include      	in.floes_ela_relax.lmp
+    		#include      	in.floes_ela_relax_dump_16.lmp
+    		clear
+    		# end of elastic shearing relaxation 16
+    		
+    		# beginning elastic shearing relaxation 17
+    		#read_restart_16#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 17
+    		
+    		# beginning elastic shearing relaxation 18
+    		#read_restart_16#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 18
+    		
+    		# beginning elastic shearing relaxation 19
+    		#read_restart_16#
+    		include      	in.floes_ela_relax.lmp
+    		clear
+    		# end of elastic shearing relaxation 19
+    
+### End of relaxation simulation ###
+### End ###

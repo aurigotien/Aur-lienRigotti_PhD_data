@@ -1,0 +1,104 @@
+### Restart simulation ###
+
+### Granulence computation ###
+
+		# Add action/reaction between grains
+		newton       	on # off = no action/reaction
+
+		neighbor     	80.0 bin # Update frequency of the particle list skin = 80 m
+		neigh_modify 	every 1 delay 1 # Update frequency of the particle list every 1 step of time
+   		
+	## Computation ##
+		
+		# All the grains properties computation
+		# Stress of the system
+		compute      	sigma_relax all stress/atom NULL virial # computation of the stress tensor componenent for each atoms
+		compute      	moy_sigma_relax all reduce sum c_sigma_relax[*] # sum the stress tensor over every atoms
+		
+		# Grains relaxation properties computation
+		# Neighbor computation
+		compute 	voisin all contact/atom
+		compute	moy_voisin all reduce ave c_voisin # mean of the neighbor over all the grains
+		
+		# Displacement of the grains
+		compute 	disp_relax all displace/atom 
+		compute 	moy_disp_relax all reduce ave c_disp_relax[*]
+		
+	## Variable ##
+
+		# Simulation parameters
+		variable 	N_STEP equal 0 # number of step of simulations
+		variable 	DT equal 1E-4 # discretisation time
+		variable 	DMIN equal 83 # grains diameters
+		variable 	DMAX equal 117
+		#variable_SHEAR#
+
+		# Monitoring variable
+		variable 	THERMO equal "v_N_STEP / 400" # 1 dump every THERMO step
+		variable 	IMG_DUMP equal "v_N_STEP / 40" # dump 40 images
+		variable	MM_FILE equal "v_N_STEP / 100" # create 101 coordination number file + force chain file
+
+		# Simulated grain properties
+		# Hertzian contact coeff
+		variable 	K_N equal 1.1E9 # normal stiffness => true value 1.1E9
+		variable 	K_T equal 9.05E8 # tangential stiffness => true value 9.05E8
+		variable 	MU equal 0.7 # grain/grain friction coefficient
+		variable 	GAMMA_N equal 14.0 # normal damping coefficient => true value 2.49
+		variable	GAMMA_T equal 12.0 # tangential damping coefficient => true value 2.26
+
+		# Monitoring of the packing fraction of the system
+		#variable_S_GRAINS#
+		variable 	LX equal lx # length of the simulation box
+		variable 	LY equal ly # higth of the simulation box
+		variable 	X_LO equal xlo # positions of the simulation box edges
+		variable 	X_HI equal xhi
+		variable 	Y_LO equal ylo
+		variable	Y_HI equal yhi
+		variable 	TILT equal xy
+		
+		# Stress of the system for relaxation
+		variable 	PHI equal "v_S_GRAINS / (v_LX*v_LY)" # compute the packing fraction
+		
+		variable     	S_XX_relax equal "c_moy_sigma_relax[1]" # normal stress S_xx
+		variable     	S_YY_relax equal "c_moy_sigma_relax[2]" # normal stress S_yy
+		variable     	S_XY_relax equal "c_moy_sigma_relax[4]" # normal stress S_xy
+				
+    		# Compute average of squared non-affine velocity
+    		variable 	VX_NA atom "(vx - y*v_SHEAR)^2" # compute square of non affine vel of vx
+    		variable 	VY atom "vy^2" # square of vy 
+    		variable 	VEL atom "v_VX_NA + v_VY" # norm of the vel vec
+    		variable 	E_C_NA atom "0.5*mass*v_VEL" # cinetic energy computation
+    		compute 	granulence all reduce ave v_E_C_NA # mean 
+    		variable 	G_NA equal c_granulence
+		
+	## Add grain/grain friction ##
+
+		pair_style   	gran/hertz/history ${K_N} ${K_T} ${GAMMA_N} ${GAMMA_T} ${MU} 1 # Frictional hertzian contact with historical effect
+		pair_coeff	* *
+
+	## Beginning of simulation ##
+
+		reset_timestep	0
+		timestep     	${DT} # simulation time step
+
+		## Sample relaxation ##
+		# Define the simple shear test with constant speed imposed by tilting the simulation box + unixial compression
+		fix          	calcul_v_m all nve/sphere disc #  compute the velocity of the atoms and the angular momentum for every sphere
+		fix          	2Dsimu all enforce2d # ensure 2D simulation by zeroing strenght/speed in z direction
+
+	## Output command ##
+
+		thermo       	${THERMO} # output 400 values
+
+		# (0) number of the step ; (1) number of atoms ; (2) mean coordination number ; (3) packing fraction ; (4) horizontal simulation box length
+		# (5) vertical simulation box length ; (6) angle of inclinaison of the box ; (7) stress S_xx ; (8) stress S_yy ; (9) stress S_xy ;
+		thermo_style 	custom &
+		step atoms c_moy_voisin v_PHI lx &
+		ly cellgamma v_S_XX_relax v_S_YY_relax v_S_XY_relax &
+		v_G_NA
+		
+	## End of elastic relaxation ##
+
+		run          	${N_STEP} # 0 step of simulation
+
+### End of granulence computation ###
